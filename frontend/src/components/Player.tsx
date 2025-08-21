@@ -25,6 +25,7 @@ interface PlayerProps {
 
 export function Player({ files, selectedFile, onFileChange, currentResult }: PlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const subtitleTrackRef = useRef<TextTrack | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -43,6 +44,67 @@ export function Player({ files, selectedFile, onFileChange, currentResult }: Pla
       setError(null)
     }
   }, [mediaUrl])
+
+  // Load and attach subtitles as a TextTrack using transcript data
+  useEffect(() => {
+    let canceled = false
+
+    const attachSubtitles = async () => {
+      // Disable and drop any existing track
+      if (subtitleTrackRef.current) {
+        try {
+          const prev = subtitleTrackRef.current
+          prev.mode = 'disabled'
+          // Remove all existing cues for cleanliness
+          if (prev.cues) {
+            // Clone list to array as it's live
+            Array.from(prev.cues).forEach(c => {
+              try { prev.removeCue(c) } catch {}
+            })
+          }
+        } catch {}
+        subtitleTrackRef.current = null
+      }
+
+      if (!videoRef.current || !selectedFile) return
+
+      try {
+        const transcript = await apiClient.getTranscript(selectedFile)
+        if (canceled) return
+        if (!transcript?.segments?.length) return
+
+        const track = videoRef.current.addTextTrack('subtitles', 'Subtitles', 'en')
+        track.mode = 'showing'
+
+        for (const seg of transcript.segments) {
+          const start = seg.start_ms / 1000
+          const end = seg.end_ms / 1000
+          const text = seg.text
+          try {
+            const cue = new VTTCue(start, end, text)
+            track.addCue(cue)
+          } catch {
+            // Safari/older browsers fallback
+            const CueClass: any = (window as any).VTTCue || (window as any).TextTrackCue
+            if (CueClass) {
+              try {
+                const cue = new CueClass(start, end, text)
+                track.addCue(cue)
+              } catch {}
+            }
+          }
+        }
+
+        subtitleTrackRef.current = track
+      } catch (e) {
+        // If no transcript (404) or error, just skip; keep player working
+        // console.warn('No transcript available or failed to load:', e)
+      }
+    }
+
+    attachSubtitles()
+    return () => { canceled = true }
+  }, [selectedFile])
 
   // Jump to timestamp when result changes
   useEffect(() => {
