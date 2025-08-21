@@ -189,7 +189,7 @@ def search_segments(query: str, file_basename: str = "", limit: int = 25, offset
         if file_basename:
             search_sql = """
                 SELECT s.start_ms, s.end_ms, s.text, v.basename, v.rel_path, v.ext,
-                       bm25(segments_fts) as rank,
+                       segments_fts.rank as rank,
                        COUNT(*) OVER() as total_count
                 FROM segments_fts
                 JOIN segments s ON segments_fts.rowid = s.id
@@ -202,7 +202,7 @@ def search_segments(query: str, file_basename: str = "", limit: int = 25, offset
         else:
             search_sql = """
                 SELECT s.start_ms, s.end_ms, s.text, v.basename, v.rel_path, v.ext,
-                       bm25(segments_fts) as rank,
+                       segments_fts.rank as rank,
                        COUNT(*) OVER() as total_count
                 FROM segments_fts
                 JOIN segments s ON segments_fts.rowid = s.id

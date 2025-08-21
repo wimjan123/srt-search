@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
+import logging
 from ..models import SearchResponse
 from ..search import search_segments
 
@@ -16,12 +17,20 @@ async def search(
     if not q.strip():
         return SearchResponse(total=0, items=[])
     
-    results, total = search_segments(
-        query=q,
-        file_basename=file,
-        limit=limit,
-        offset=offset,
-        fuzzy=bool(fuzzy)
-    )
-    
-    return SearchResponse(total=total, items=results)
+    try:
+        results, total = search_segments(
+            query=q,
+            file_basename=file,
+            limit=limit,
+            offset=offset,
+            fuzzy=bool(fuzzy)
+        )
+        
+        return SearchResponse(total=total, items=results)
+        
+    except Exception as e:
+        logging.error(f"Search failed for query '{q}': {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Search failed: {str(e)}"
+        )
