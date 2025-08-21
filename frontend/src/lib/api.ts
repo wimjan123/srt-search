@@ -1,4 +1,4 @@
-import { FileInfo, SearchResponse, SearchParams } from '../types'
+import { FileInfo, SearchResponse, SearchParams, Transcript } from '../types'
 
 const API_BASE = window.location.origin
 
@@ -41,6 +41,14 @@ class ApiClient {
     })
     if (!response.ok) {
       throw new Error(`Reindex failed: ${response.statusText}`)
+    }
+    return response.json()
+  }
+
+  async getTranscript(videoBasename: string): Promise<Transcript> {
+    const response = await fetch(`${API_BASE}/api/transcript/${encodeURIComponent(videoBasename)}`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch transcript: ${response.statusText}`)
     }
     return response.json()
   }

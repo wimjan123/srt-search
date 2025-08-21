@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { FixedSizeList as List } from 'react-window'
 import { SearchResult } from '../types'
-import { Play, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 interface ResultsProps {
   results: SearchResult[]
@@ -10,6 +10,7 @@ interface ResultsProps {
   pageSize: number
   onPageChange: (page: number) => void
   onResultClick: (result: SearchResult) => void
+  onTranscriptClick: (videoBasename: string) => void
   selectedResultIndex?: number
   isLoading?: boolean
 }
@@ -20,6 +21,7 @@ interface ResultItemProps {
   data: {
     results: SearchResult[]
     onResultClick: (result: SearchResult) => void
+    onTranscriptClick: (videoBasename: string) => void
     selectedIndex?: number
   }
 }
@@ -28,17 +30,27 @@ function ResultItem({ index, style, data }: ResultItemProps) {
   const result = data.results[index]
   const isSelected = data.selectedIndex === index
 
+  const handleTranscriptClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    data.onTranscriptClick(result.video_basename)
+  }
+
   return (
     <div style={style}>
       <div
-        className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-blue-50 transition-colors ${
+        className={`p-4 border-b border-gray-200 hover:bg-blue-50 transition-colors ${
           isSelected ? 'bg-blue-100 border-blue-300' : ''
         }`}
-        onClick={() => data.onResultClick(result)}
       >
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-1">
-            <Play className="h-4 w-4 text-blue-500" />
+            <button
+              onClick={() => data.onResultClick(result)}
+              className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded"
+              title="Jump to timestamp"
+            >
+              <Play className="h-4 w-4" />
+            </button>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -48,9 +60,18 @@ function ResultItem({ index, style, data }: ResultItemProps) {
               <span className="text-sm text-blue-600 font-mono">
                 {result.timecode}
               </span>
+              <button
+                onClick={handleTranscriptClick}
+                className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
+                title="View full transcript"
+              >
+                <FileText className="h-3 w-3" />
+                Transcript
+              </button>
             </div>
             <div
-              className="text-sm text-gray-600 leading-relaxed"
+              className="text-sm text-gray-600 leading-relaxed cursor-pointer"
+              onClick={() => data.onResultClick(result)}
               dangerouslySetInnerHTML={{ __html: result.snippet_html }}
             />
           </div>
@@ -67,6 +88,7 @@ export function Results({
   pageSize,
   onPageChange,
   onResultClick,
+  onTranscriptClick,
   selectedResultIndex,
   isLoading = false
 }: ResultsProps) {
@@ -76,6 +98,7 @@ export function Results({
   const itemData = {
     results,
     onResultClick,
+    onTranscriptClick,
     selectedIndex: selectedResultIndex
   }
 

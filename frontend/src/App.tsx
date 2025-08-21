@@ -3,8 +3,9 @@ import { SearchBar } from './components/SearchBar'
 import { FileFilter } from './components/FileFilter'
 import { Results } from './components/Results'
 import { Player } from './components/Player'
+import { TranscriptViewer } from './components/TranscriptViewer'
 import { apiClient } from './lib/api'
-import { FileInfo, SearchResult } from './types'
+import { FileInfo, SearchResult, TranscriptSegment } from './types'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>()
   const [currentResult, setCurrentResult] = useState<SearchResult>()
   const [playerFile, setPlayerFile] = useState('')
+  const [transcriptVideoBasename, setTranscriptVideoBasename] = useState<string | null>(null)
 
   // Loading states
   const [isLoadingFiles, setIsLoadingFiles] = useState(true)
@@ -147,6 +149,28 @@ function App() {
     setCurrentPage(0)
   }, [])
 
+  const handleTranscriptClick = (videoBasename: string) => {
+    setTranscriptVideoBasename(videoBasename)
+  }
+
+  const handleTranscriptClose = () => {
+    setTranscriptVideoBasename(null)
+  }
+
+  const handleTimestampClick = (segment: TranscriptSegment) => {
+    setCurrentResult({
+      video_basename: transcriptVideoBasename!,
+      rel_path: '',
+      ext: '',
+      start_ms: segment.start_ms,
+      end_ms: segment.end_ms,
+      timecode: segment.timecode,
+      snippet_html: segment.text
+    })
+    setPlayerFile(transcriptVideoBasename!)
+    setTranscriptVideoBasename(null)
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -217,6 +241,7 @@ function App() {
             pageSize={pageSize}
             onPageChange={handlePageChange}
             onResultClick={handleResultClick}
+            onTranscriptClick={handleTranscriptClick}
             selectedResultIndex={selectedResultIndex}
             isLoading={isLoadingResults}
           />
@@ -248,6 +273,15 @@ function App() {
           </ul>
         </div>
       </div>
+
+      {/* Transcript Viewer Modal */}
+      {transcriptVideoBasename && (
+        <TranscriptViewer
+          videoBasename={transcriptVideoBasename}
+          onClose={handleTranscriptClose}
+          onTimestampClick={handleTimestampClick}
+        />
+      )}
     </div>
   )
 }

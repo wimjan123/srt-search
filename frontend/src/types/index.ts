@@ -28,3 +28,17 @@ export interface SearchParams {
   limit?: number
   fuzzy?: number
 }
+
+export interface TranscriptSegment {
+  start_ms: number
+  end_ms: number
+  timecode: string
+  text: string
+}
+
+export interface Transcript {
+  video_basename: string
+  rel_path: string
+  ext: string
+  segments: TranscriptSegment[]
+}
