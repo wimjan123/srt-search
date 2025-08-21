@@ -14,6 +14,8 @@ function App() {
   // State
   const [files, setFiles] = useState<FileInfo[]>([])
   const [query, setQuery] = useState('')
+  // The last submitted query; searches run against this, not while typing
+  const [submittedQuery, setSubmittedQuery] = useState('')
   const [selectedFile, setSelectedFile] = useState('')
   const [fuzzy, setFuzzy] = useState(false)
   const [results, setResults] = useState<SearchResult[]>([])
@@ -60,16 +62,22 @@ function App() {
     }
   }, [searchParams, setSearchParams])
 
-  // Search when query, file, or page changes
+  // Run search when a query has been submitted and search inputs change
   useEffect(() => {
-    if (query.trim()) {
+    if (submittedQuery.trim()) {
       search()
-    } else {
+    }
+  }, [submittedQuery, selectedFile, currentPage, fuzzy])
+
+  // Clear results when the input is cleared
+  useEffect(() => {
+    if (!query.trim()) {
+      setSubmittedQuery('')
       setResults([])
       setTotal(0)
       setSelectedResultIndex(undefined)
     }
-  }, [query, selectedFile, currentPage, fuzzy])
+  }, [query])
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -112,13 +120,13 @@ function App() {
   }
 
   const search = async () => {
-    if (!query.trim()) return
+    if (!submittedQuery.trim()) return
 
     try {
       setIsLoadingResults(true)
       setError(null)
       const response = await apiClient.search({
-        q: query,
+        q: submittedQuery,
         file: selectedFile,
         offset: currentPage * pageSize,
         limit: pageSize,
@@ -174,6 +182,12 @@ function App() {
 
   // Note: Transcript handling is now done via routing to /transcript/:videoBasename
 
+  // Trigger a new search based on the current input value
+  const triggerSearch = () => {
+    setSubmittedQuery(query)
+    setCurrentPage(0)
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -212,7 +226,7 @@ function App() {
             onQueryChange={handleQueryChange}
             fuzzy={fuzzy}
             onFuzzyChange={setFuzzy}
-            onSearch={search}
+            onSearch={triggerSearch}
             isLoading={isLoadingResults}
           />
 
@@ -242,7 +256,7 @@ function App() {
             onQueryChange={handleQueryChange}
             fuzzy={fuzzy}
             onFuzzyChange={setFuzzy}
-            onSearch={search}
+            onSearch={triggerSearch}
             isLoading={isLoadingResults}
           />
 
