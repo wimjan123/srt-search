@@ -31,45 +31,45 @@ function ResultItem({ result, isSelected, onResultClick }: ResultItemProps) {
 
   return (
     <div
-      className={`p-4 border-b border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer ${
-        isSelected ? 'bg-blue-100 border-blue-300' : ''
+      className={`p-6 border-b border-white/20 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-200 cursor-pointer group ${
+        isSelected ? 'bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border-blue-200/50 shadow-lg' : ''
       }`}
       onClick={() => onResultClick(result)}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         <div className="flex-shrink-0 mt-1">
           <button
             onClick={(e) => {
               e.stopPropagation()
               onResultClick(result)
             }}
-            className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+            className="group/play p-3 text-blue-500 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-500 hover:to-indigo-600 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             title="Jump to timestamp"
           >
-            <Play className="h-4 w-4" />
+            <Play className="h-5 w-5 transition-transform group-hover/play:scale-110" />
           </button>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-            <span className="font-medium text-gray-900 truncate">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+            <span className="font-semibold text-gray-900 truncate text-lg group-hover:text-blue-800 transition-colors">
               {result.video_basename}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-blue-600 font-mono bg-blue-50 px-2 py-1 rounded">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-mono text-blue-700 bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1.5 rounded-full border border-blue-200/50 shadow-sm">
                 {result.timecode}
               </span>
               <button
                 onClick={handleTranscriptClick}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                className="group/transcript flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-blue-700 bg-gray-100/50 hover:bg-blue-50 rounded-full border border-gray-200/50 hover:border-blue-200/50 transition-all duration-200 shadow-sm hover:shadow-md"
                 title="View full transcript"
               >
-                <FileText className="h-3 w-3" />
+                <FileText className="h-3 w-3 transition-transform group-hover/transcript:scale-110" />
                 <span className="hidden sm:inline">Transcript</span>
               </button>
             </div>
           </div>
           <div
-            className="text-sm text-gray-600 leading-relaxed"
+            className="text-sm text-gray-700 leading-relaxed bg-white/30 backdrop-blur-sm rounded-xl p-4 border border-white/30"
             dangerouslySetInnerHTML={{ __html: result.snippet_html }}
           />
         </div>
@@ -123,10 +123,14 @@ export function Results({
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
+      <div className="flex-1 flex items-center justify-center p-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-gray-500">Searching...</div>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-indigo-400/20 animate-pulse"></div>
+          </div>
+          <div className="text-gray-600 font-medium text-lg">Searching transcripts...</div>
+          <div className="text-gray-500 text-sm mt-2">Finding the perfect matches</div>
         </div>
       </div>
     )
@@ -134,10 +138,17 @@ export function Results({
 
   if (results.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-gray-500 text-center">
-          <div className="mb-2 text-lg">No results found</div>
-          <div className="text-sm">Try a different search term or enable fuzzy search</div>
+      <div className="flex-1 flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
+            <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.489.901-6.091 2.382M3 18a9 9 0 0118 0v1H3v-1z" />
+            </svg>
+          </div>
+          <div className="text-gray-600 font-semibold text-xl mb-2">No results found</div>
+          <div className="text-gray-500 text-sm leading-relaxed max-w-xs">
+            Try a different search term, enable fuzzy search, or check if your videos have subtitles
+          </div>
         </div>
       </div>
     )
@@ -146,13 +157,24 @@ export function Results({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 bg-gray-50 border-b">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <span className="text-sm text-gray-600">
-            {total.toLocaleString()} results • Page {currentPage + 1} of {totalPages}
-          </span>
-          <div className="text-xs text-gray-500">
-            Use ↑↓ or j/k to navigate, Enter to play
+      <div className="flex-shrink-0 p-6 bg-gradient-to-r from-white/50 to-blue-50/50 backdrop-blur-sm border-b border-white/30">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-700">
+              {total.toLocaleString()} <span className="text-blue-600">results</span>
+            </span>
+            <span className="text-gray-400">•</span>
+            <span className="text-sm text-gray-600">
+              Page <span className="font-medium text-blue-600">{currentPage + 1}</span> of <span className="font-medium">{totalPages}</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/50 px-3 py-1.5 rounded-full border border-white/30">
+            <kbd className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono border border-gray-200">↑↓</kbd>
+            <span>or</span>
+            <kbd className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono border border-gray-200">j/k</kbd>
+            <span>to navigate,</span>
+            <kbd className="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono border border-gray-200">Enter</kbd>
+            <span>to play</span>
           </div>
         </div>
       </div>
@@ -174,28 +196,28 @@ export function Results({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex-shrink-0 p-4 bg-gray-50 border-t">
+        <div className="flex-shrink-0 p-6 bg-gradient-to-r from-white/50 to-blue-50/50 backdrop-blur-sm border-t border-white/30">
           <div className="flex items-center justify-between">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 0}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:cursor-not-allowed rounded-lg hover:bg-white transition-colors"
+              className="group flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:cursor-not-allowed bg-white/50 hover:bg-white/80 rounded-xl border border-white/30 hover:border-gray-200/50 transition-all duration-200 shadow-sm hover:shadow-md"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               <span className="hidden sm:inline">Previous</span>
             </button>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 const pageNum = Math.max(0, Math.min(totalPages - 5, currentPage - 2)) + i
                 return (
                   <button
                     key={pageNum}
                     onClick={() => onPageChange(pageNum)}
-                    className={`px-3 py-2 text-sm rounded-lg transition-colors ${
+                    className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 shadow-sm hover:shadow-md ${
                       pageNum === currentPage
-                        ? 'bg-blue-500 text-white'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-white'
+                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border border-blue-400/50 transform scale-105'
+                        : 'text-gray-600 hover:text-gray-900 bg-white/50 hover:bg-white/80 border border-white/30 hover:border-gray-200/50'
                     }`}
                   >
                     {pageNum + 1}
@@ -207,10 +229,10 @@ export function Results({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages - 1}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:cursor-not-allowed rounded-lg hover:bg-white transition-colors"
+              className="group flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:text-gray-400 disabled:cursor-not-allowed bg-white/50 hover:bg-white/80 rounded-xl border border-white/30 hover:border-gray-200/50 transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
         </div>

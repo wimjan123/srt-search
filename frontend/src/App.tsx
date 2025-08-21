@@ -189,17 +189,24 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-sm px-6 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">SRT Search</h1>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">SRT Search</h1>
+          </div>
           <button
             onClick={handleReindex}
             disabled={isReindexing}
-            className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+            className="group flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            <RefreshCw className={`h-4 w-4 ${isReindexing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 transition-transform duration-200 ${isReindexing ? 'animate-spin' : 'group-hover:rotate-180'}`} />
             {isReindexing ? 'Reindexing...' : 'Reindex'}
           </button>
         </div>
@@ -207,20 +214,24 @@ function App() {
 
       {/* Error Banner */}
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mx-6 my-4">
-          <div className="flex">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
+        <div className="mx-6 my-6">
+          <div className="bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Main Content */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 p-4 lg:p-6">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 p-6 lg:p-8">
         {/* Mobile: Search and Filter */}
-        <div className="lg:hidden space-y-4">
+        <div className="lg:hidden space-y-6">
           <SearchBar
             query={query}
             onQueryChange={handleQueryChange}
@@ -238,11 +249,11 @@ function App() {
           />
 
           {query && (
-            <div className="text-sm text-gray-600 bg-white p-3 rounded-lg">
-              <div>Total: {total.toLocaleString()} results</div>
+            <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-lg">
+              <div className="text-sm font-medium text-gray-700">Total: <span className="text-blue-600">{total.toLocaleString()}</span> results</div>
               {results.length > 0 && (
-                <div>
-                  Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, total)}
+                <div className="text-sm text-gray-600 mt-1">
+                  Showing <span className="font-medium">{currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, total)}</span>
                 </div>
               )}
             </div>
@@ -250,7 +261,7 @@ function App() {
         </div>
 
         {/* Desktop Left Column - Search */}
-        <div className="hidden lg:block lg:w-1/4 xl:w-1/5 space-y-6">
+        <div className="hidden lg:block lg:w-1/4 xl:w-1/5 space-y-8">
           <SearchBar
             query={query}
             onQueryChange={handleQueryChange}
@@ -268,11 +279,11 @@ function App() {
           />
 
           {query && (
-            <div className="text-sm text-gray-600">
-              <div>Total: {total.toLocaleString()} results</div>
+            <div className="bg-white/70 backdrop-blur-sm border border-white/20 rounded-2xl p-4 shadow-lg">
+              <div className="text-sm font-medium text-gray-700">Total: <span className="text-blue-600">{total.toLocaleString()}</span> results</div>
               {results.length > 0 && (
-                <div>
-                  Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, total)}
+                <div className="text-sm text-gray-600 mt-1">
+                  Showing <span className="font-medium">{currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, total)}</span>
                 </div>
               )}
             </div>
@@ -281,7 +292,7 @@ function App() {
 
         {/* Main Content Area */}
         <div className="flex-1 lg:w-1/2 xl:w-3/5 min-h-0">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 h-full flex flex-col overflow-hidden">
             <Results
               results={results}
               total={total}
@@ -298,7 +309,7 @@ function App() {
 
         {/* Right Column - Player (Desktop) / Bottom (Mobile) */}
         <div className="lg:w-1/4 xl:w-1/5">
-          <div className="lg:sticky lg:top-6">
+          <div className="lg:sticky lg:top-8">
             <Player
               files={files}
               selectedFile={playerFile}
@@ -310,15 +321,35 @@ function App() {
       </div>
 
       {/* Instructions */}
-      <div className="px-6 pb-6">
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Search Tips</h3>
-          <ul className="text-xs text-blue-800 space-y-1">
-            <li>• Use quotes for exact phrases: "hello world"</li>
-            <li>• Use * for prefix matching: democra*</li>
-            <li>• Use OR for boolean search: cat OR dog</li>
-            <li>• Enable fuzzy search for approximate matches</li>
-            <li>• Use j/k or ↑↓ to navigate results, Enter to play</li>
+      <div className="px-8 pb-8">
+        <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm border border-blue-200/30 rounded-2xl p-6 shadow-lg">
+          <h3 className="text-base font-semibold text-blue-900 mb-4 flex items-center gap-2">
+            <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Search Tips
+          </h3>
+          <ul className="text-sm text-blue-800 space-y-2">
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 bg-blue-400 rounded-full"></div>
+              Use quotes for exact phrases: <code className="bg-blue-100 px-2 py-0.5 rounded text-xs font-mono">"hello world"</code>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 bg-blue-400 rounded-full"></div>
+              Use * for prefix matching: <code className="bg-blue-100 px-2 py-0.5 rounded text-xs font-mono">democra*</code>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 bg-blue-400 rounded-full"></div>
+              Use OR for boolean search: <code className="bg-blue-100 px-2 py-0.5 rounded text-xs font-mono">cat OR dog</code>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 bg-blue-400 rounded-full"></div>
+              Enable fuzzy search for approximate matches
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 bg-blue-400 rounded-full"></div>
+              Use <kbd className="bg-blue-100 px-1.5 py-0.5 rounded text-xs font-mono border border-blue-200">j</kbd>/<kbd className="bg-blue-100 px-1.5 py-0.5 rounded text-xs font-mono border border-blue-200">k</kbd> or <kbd className="bg-blue-100 px-1.5 py-0.5 rounded text-xs font-mono border border-blue-200">↑↓</kbd> to navigate, <kbd className="bg-blue-100 px-1.5 py-0.5 rounded text-xs font-mono border border-blue-200">Enter</kbd> to play
+            </li>
           </ul>
         </div>
       </div>
