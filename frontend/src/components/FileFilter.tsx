@@ -1,4 +1,3 @@
-import React from 'react'
 import { FileInfo } from '../types'
 import { ChevronDown, FileVideo, FileX } from 'lucide-react'
 

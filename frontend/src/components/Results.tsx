@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { FixedSizeList as List } from 'react-window'
 import { SearchResult } from '../types'
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -143,6 +143,7 @@ export function Results({
         <List
           ref={listRef}
           height={400}
+          width="100%"
           itemCount={results.length}
           itemSize={100}
           itemData={itemData}

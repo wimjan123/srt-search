@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { FileInfo, SearchResult } from '../types'
 import { apiClient } from '../lib/api'
 import { formatTime, msToSeconds } from '../lib/utils'
@@ -104,7 +104,7 @@ export function Player({ files, selectedFile, onFileChange, currentResult }: Pla
     if (mediaUrl) {
       const link = document.createElement('a')
       link.href = mediaUrl
-      link.download = currentFileInfo?.basename + currentFileInfo?.ext || 'video'
+      link.download = (currentFileInfo?.basename || 'video') + (currentFileInfo?.ext || '')
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
