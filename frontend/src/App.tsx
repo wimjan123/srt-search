@@ -1,14 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router'
 import { SearchBar } from './components/SearchBar'
 import { FileFilter } from './components/FileFilter'
 import { Results } from './components/Results'
 import { Player } from './components/Player'
-import { TranscriptViewer } from './components/TranscriptViewer'
 import { apiClient } from './lib/api'
-import { FileInfo, SearchResult, TranscriptSegment } from './types'
+import { FileInfo, SearchResult } from './types'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 
 function App() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  
   // State
   const [files, setFiles] = useState<FileInfo[]>([])
   const [query, setQuery] = useState('')
@@ -20,7 +22,6 @@ function App() {
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>()
   const [currentResult, setCurrentResult] = useState<SearchResult>()
   const [playerFile, setPlayerFile] = useState('')
-  const [transcriptVideoBasename, setTranscriptVideoBasename] = useState<string | null>(null)
 
   // Loading states
   const [isLoadingFiles, setIsLoadingFiles] = useState(true)
@@ -32,10 +33,32 @@ function App() {
 
   const pageSize = 25
 
-  // Load files on mount
+  // Load files on mount and handle URL parameters
   useEffect(() => {
     loadFiles()
-  }, [])
+    
+    // Handle return from transcript page
+    const videoParam = searchParams.get('video')
+    const timeParam = searchParams.get('time')
+    
+    if (videoParam) {
+      setPlayerFile(videoParam)
+      if (timeParam) {
+        const startMs = parseInt(timeParam)
+        setCurrentResult({
+          video_basename: videoParam,
+          rel_path: '',
+          ext: '',
+          start_ms: startMs,
+          end_ms: startMs + 5000, // Add 5 second duration
+          timecode: new Date(startMs).toISOString().substr(11, 8),
+          snippet_html: 'Jumped from transcript'
+        })
+      }
+      // Clear the URL parameters
+      setSearchParams({})
+    }
+  }, [searchParams, setSearchParams])
 
   // Search when query, file, or page changes
   useEffect(() => {
@@ -149,27 +172,7 @@ function App() {
     setCurrentPage(0)
   }, [])
 
-  const handleTranscriptClick = (videoBasename: string) => {
-    setTranscriptVideoBasename(videoBasename)
-  }
-
-  const handleTranscriptClose = () => {
-    setTranscriptVideoBasename(null)
-  }
-
-  const handleTimestampClick = (segment: TranscriptSegment) => {
-    setCurrentResult({
-      video_basename: transcriptVideoBasename!,
-      rel_path: '',
-      ext: '',
-      start_ms: segment.start_ms,
-      end_ms: segment.end_ms,
-      timecode: segment.timecode,
-      snippet_html: segment.text
-    })
-    setPlayerFile(transcriptVideoBasename!)
-    setTranscriptVideoBasename(null)
-  }
+  // Note: Transcript handling is now done via routing to /transcript/:videoBasename
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -201,9 +204,39 @@ function App() {
       )}
 
       {/* Main Content */}
-      <div className="flex gap-6 p-6">
-        {/* Left Column - Search */}
-        <div className="w-1/4 space-y-6">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 p-4 lg:p-6">
+        {/* Mobile: Search and Filter */}
+        <div className="lg:hidden space-y-4">
+          <SearchBar
+            query={query}
+            onQueryChange={handleQueryChange}
+            fuzzy={fuzzy}
+            onFuzzyChange={setFuzzy}
+            onSearch={search}
+            isLoading={isLoadingResults}
+          />
+
+          <FileFilter
+            files={files}
+            selectedFile={selectedFile}
+            onFileChange={handleFileChange}
+            isLoading={isLoadingFiles}
+          />
+
+          {query && (
+            <div className="text-sm text-gray-600 bg-white p-3 rounded-lg">
+              <div>Total: {total.toLocaleString()} results</div>
+              {results.length > 0 && (
+                <div>
+                  Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, total)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Left Column - Search */}
+        <div className="hidden lg:block lg:w-1/4 xl:w-1/5 space-y-6">
           <SearchBar
             query={query}
             onQueryChange={handleQueryChange}
@@ -232,24 +265,26 @@ function App() {
           )}
         </div>
 
-        {/* Center Column - Results */}
-        <div className="w-1/2 bg-white rounded-lg shadow">
-          <Results
-            results={results}
-            total={total}
-            currentPage={currentPage}
-            pageSize={pageSize}
-            onPageChange={handlePageChange}
-            onResultClick={handleResultClick}
-            onTranscriptClick={handleTranscriptClick}
-            selectedResultIndex={selectedResultIndex}
-            isLoading={isLoadingResults}
-          />
+        {/* Main Content Area */}
+        <div className="flex-1 lg:w-1/2 xl:w-3/5">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <Results
+              results={results}
+              total={total}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onResultClick={handleResultClick}
+              onTranscriptClick={() => {}} // Handled by Results component directly
+              selectedResultIndex={selectedResultIndex}
+              isLoading={isLoadingResults}
+            />
+          </div>
         </div>
 
-        {/* Right Column - Player */}
-        <div className="w-1/4">
-          <div className="sticky top-6">
+        {/* Right Column - Player (Desktop) / Bottom (Mobile) */}
+        <div className="lg:w-1/4 xl:w-1/5">
+          <div className="lg:sticky lg:top-6">
             <Player
               files={files}
               selectedFile={playerFile}
@@ -274,14 +309,6 @@ function App() {
         </div>
       </div>
 
-      {/* Transcript Viewer Modal */}
-      {transcriptVideoBasename && (
-        <TranscriptViewer
-          videoBasename={transcriptVideoBasename}
-          onClose={handleTranscriptClose}
-          onTimestampClick={handleTimestampClick}
-        />
-      )}
     </div>
   )
 }

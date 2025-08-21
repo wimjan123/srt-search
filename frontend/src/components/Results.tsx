@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router'
 import { FixedSizeList as List } from 'react-window'
 import { SearchResult } from '../types'
 import { Play, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
@@ -27,12 +28,13 @@ interface ResultItemProps {
 }
 
 function ResultItem({ index, style, data }: ResultItemProps) {
+  const navigate = useNavigate()
   const result = data.results[index]
   const isSelected = data.selectedIndex === index
 
   const handleTranscriptClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    data.onTranscriptClick(result.video_basename)
+    navigate(`/transcript/${result.video_basename}`)
   }
 
   return (
@@ -62,11 +64,11 @@ function ResultItem({ index, style, data }: ResultItemProps) {
               </span>
               <button
                 onClick={handleTranscriptClick}
-                className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
+                className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 title="View full transcript"
               >
                 <FileText className="h-3 w-3" />
-                Transcript
+                <span className="hidden sm:inline">Transcript</span>
               </button>
             </div>
             <div
