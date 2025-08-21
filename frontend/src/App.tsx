@@ -266,8 +266,8 @@ function App() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 lg:w-1/2 xl:w-3/5">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="flex-1 lg:w-1/2 xl:w-3/5 min-h-0">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
             <Results
               results={results}
               total={total}

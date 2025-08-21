@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search, ToggleLeft, ToggleRight } from 'lucide-react'
 
 interface SearchBarProps {
@@ -19,6 +19,7 @@ export function SearchBar({
   isLoading = false 
 }: SearchBarProps) {
   const [localQuery, setLocalQuery] = useState(query)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setLocalQuery(query)
@@ -45,20 +46,23 @@ export function SearchBar({
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
+            ref={inputRef}
             type="text"
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
-            placeholder="Search subtitles... (use quotes for phrases, * for prefix, OR for boolean)"
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Search subtitles..."
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
             disabled={isLoading}
+            autoComplete="off"
+            spellCheck="false"
           />
         </div>
         <button
           type="submit"
           disabled={isLoading || !localQuery.trim()}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="px-4 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium transition-colors"
         >
-          Search
+          {isLoading ? 'Searching...' : 'Search'}
         </button>
       </form>
       
