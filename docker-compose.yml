@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  srt-search:
+    build: .
+    container_name: srt-search
+    ports:
+      - "3456:3456"
+    volumes:
+      - "${MEDIA_DIR}:/media:ro"
+      - "./data:/app/data"
+    environment:
+      - MEDIA_DIR=/media
+      - DATABASE_PATH=/app/data/srt_search.db
+      - ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3456/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
