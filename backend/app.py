@@ -83,6 +83,12 @@ async def serve_media(file_path: str, request: Request):
 # Serve static frontend files (for production)
 frontend_dist = Path(__file__).parent / "static"
 if frontend_dist.exists():
+    # Mount static assets at /assets to match Vite's output
+    assets_dir = frontend_dist / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+    
+    # Also mount the entire static directory for any other files
     app.mount("/static", StaticFiles(directory=str(frontend_dist)), name="static")
     
     @app.get("/")
@@ -91,6 +97,15 @@ if frontend_dist.exists():
         if index_file.exists():
             return FileResponse(index_file)
         return {"message": "Frontend not built. Run in development mode or build frontend first."}
+    
+    # Serve favicon and other root assets
+    @app.get("/vite.svg")
+    async def serve_vite_svg():
+        vite_svg = frontend_dist / "vite.svg"
+        if vite_svg.exists():
+            return FileResponse(vite_svg)
+        raise HTTPException(status_code=404, detail="File not found")
+        
 else:
     @app.get("/")
     async def root():

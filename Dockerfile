@@ -7,6 +7,10 @@ RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
+# Verify build output
+RUN ls -la ../backend/static/ || echo "Static directory not found"
+RUN ls -la ../backend/static/assets/ || echo "Assets directory not found"
+
 FROM python:3.11-slim
 
 WORKDIR /app
